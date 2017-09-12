@@ -2,6 +2,7 @@
 
 namespace Laravel\Passport\Bridge;
 
+use phpDocumentor\Reflection\Types\Integer;
 use RuntimeException;
 use Illuminate\Contracts\Hashing\Hasher;
 use League\OAuth2\Server\Entities\ClientEntityInterface;
@@ -41,10 +42,16 @@ class UserRepository implements UserRepositoryInterface
         if (method_exists($model, 'findForPassport')) {
             $user = (new $model)->findForPassport($username);
         } else {
-            $user = (new $model)->where('email', $username)->first();
+            if(!ctype_digit($username))
+            {
+                $user = (new $model)->where('email', $username)->first();
+            }else{
+                $user = (new $model)->where('mobile', $username)->first();
+            }
         }
 
-        if (! $user) {
+
+        if (! $user ) {
             return;
         } elseif (method_exists($user, 'validateForPassportPasswordGrant')) {
             if (! $user->validateForPassportPasswordGrant($password)) {
